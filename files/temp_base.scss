@@ -1,0 +1,112 @@
+// Here is where you can define your constants for your application and to configure the blueprint framework.
+// Feel free to delete these if you want keep the defaults:
+
+$blueprint-grid-columns: 24;
+//$blueprint-container-size: 950px;
+$blueprint-grid-width: 30px;
+$blueprint-grid-margin: 10px;
+
+
+// Use this to calculate the width based on the total width.
+// Or you can set $blueprint-grid-width to a fixed value and unset $blueprint-container-size -- it will be calculated for you.
+//$blueprint-grid-width: ($blueprint-container-size + $blueprint-grid-margin) / $blueprint-grid-columns - $blueprint-grid-margin;
+
+@mixin standard-box-shadow($horizontal:0px, $vertical:0px, $blur:5px, $spread:0px, $shadow-color:#888) {
+  -moz-box-shadow: $horizontal $vertical $blur $spread $shadow-color; 
+	-webkit-box-shadow: $horizontal $vertical $blur $spread $shadow-color; 
+	box-shadow: $horizontal $vertical $blur $spread $shadow-color;
+}
+
+/*Dark Text on Lighter Background, make the shadow close to white and 1px on Y axis.*/
+@mixin dark-on-light-text-shadow($color, $vertical:1px) {
+  text-shadow: 0px $vertical 0px $color;
+}
+
+/*Light Text on Darker Background, make the sadow a darker shade of the background and -1px on Y axis.*/
+@mixin light-on-dark-text-shadow($color, $vertical:-1px) {
+  text-shadow: 0px $vertical 0px $color;
+}
+
+@mixin rounded-corner($side1, $side2, $radius: 6px) {
+  border-#{$side1}-#{$side2}-radius: $radius;
+  -moz-border-radius-#{$side1}#{$side2}: $radius;
+  -webkit-border-#{$side1}-#{$side2}-radius: $radius;
+}
+
+//Fancy Borders
+@mixin ag-fancy-border($color, $border-top:1px) {
+  border: $border-top solid lighten($color, 20%);
+  border-bottom: 1px solid darken($color, 20%);
+  border-right: 1px solid darken($color, 20%);
+}
+
+//Fancy Buttons
+@mixin ag-fancy-button($bg-color:#457ED3, $font-color:#EFEFEF, $fb-height:34px, $fb-width:180px, $rad:6px, $image: false) {  
+  @include ag-fancy-border($bg-color);
+  //outline: none;
+	display: block;
+	cursor: pointer;
+	text-align: center;
+	background: $bg-color;
+	//-webkit-gradient(linear, 0% 10%, 0% 90%, from(#20DB0B), to(#18A608), color-stop(.5,#18A608),color-stop(.5,#138506))
+	@include background-image(linear-gradient(lighten($bg-color, 0%), darken($bg-color, 10%) 50%, darken($bg-color, 15%) 50%, darken($bg-color, 10%)));
+	
+	
+	color: $font-color;
+	font-size: $fb-height * 0.4;
+	text-decoration: none;
+	margin: 0px auto 20px; padding: 0px;
+	height: $fb-height; width: $fb-width;
+	line-height: $fb-height;
+	@include light-on-dark-text-shadow(darken($bg-color, 40%));
+  @include standard-border-radius($rad);
+  
+      //&:hover { background-color: lighten($bg-color, 3%); }
+}
+
+@mixin ag-fancy-bg($bg-color:#457ED3, $height:60px, $width:180px, $gradient:true, $rad:10px) {
+  //display: block;
+  @include ag-fancy-border($bg-color);
+  
+  @if $gradient == true {
+    @include background-image(linear-gradient(lighten($box-bg-color, 10%), darken($box-bg-color, 0%) 70%, darken($box-bg-color, 0%))); //Compass gradient mixin
+  }
+  @else {
+    background-color: $bg-color;
+  }
+  
+  margin: 0px; padding: 15px;
+  min-height: $height; width: $width;
+  @include standard-border-radius($rad);
+  @include standard-box-shadow;
+}
+
+/* TABLES */
+@mixin table-row-style($color-1, $color-2, $corner-radius: 5px) {
+//table {// @include alternating-rows-and-columns($table-even-row, $table-odd-row, transparent, $table-header-color, $table-footer-color);
+        @include border-radius($corner-radius);
+        
+  tr {
+    padding: 0px; margin: 0px; border-collapse: collapse;
+    &:nth-child(even) {
+       background: $color-1;
+    }
+    &:nth-child(odd) {
+       background: $color-2;
+    }
+    &:first-child {
+      th, td {
+         &:first-child {@include rounded-corner(top, left, $corner-radius);}
+         &:last-child {@include rounded-corner(top, right, $corner-radius);}
+      }
+    }
+    &:last-child {
+      td:first-child, th:first-child {@include rounded-corner(bottom, left, $corner-radius);}
+      td:last-child, th:last-child { @include rounded-corner(bottom, right, $corner-radius);}
+    }
+
+  }
+  td { 
+    border-top: 1px solid #FFF; padding: 8px; text-align: left;
+  }
+}

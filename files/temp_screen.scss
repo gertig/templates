@@ -1,0 +1,109 @@
+// This import applies a global reset to any page that imports this stylesheet.
+@import "blueprint/reset";
+@import "compass/css3/border-radius";
+// To configure blueprint, edit the partials/base.sass file.
+@import "partials/base";
+// Import all the default blueprint modules so that we can access their mixins.
+@import "blueprint";
+// Import the non-default scaffolding module.
+@import "blueprint/scaffolding";
+
+@import "compass/css3/images";
+@import "compass/css3/font-face";
+@import "compass/utilities";
+
+@include font-face("AllerBold", font-files("/fonts/AllerBold.ttf", font/truetype));
+@include font-face("SocialIcons", font-files("/fonts/SocialIcons.otf", font/opentype));
+
+// To generate css equivalent to the blueprint css but with your
+// configuration applied, uncomment:
+@include blueprint;
+
+//Color Palette
+//http://www.colourlovers.com/palette/1620509/Ocean_Breeze
+$grey: #8F9198;
+$grey-blue: #929FB2;
+$red: #98161a;
+$green: #008c44;
+
+//* { outline:1px solid #336699;}
+
+.hidden_item { display: none; }
+a:hover { background: transparent; }
+
+div#content {
+  margin: 0px;
+}
+
+/*-------------------------
+  FLASH NOTIFICATIONS 
+--------------------------*/
+div#messages {
+  position: relative;
+  width: 100%; height: 40px; line-height: 40px; text-align: center;
+  z-index: 999;
+  font-size: 16px;
+  opacity: .95;
+
+  #flash_notice {
+    height: 40px;
+    width: 100%;
+    color: lighten($green, 20%); 
+    @include light-on-dark-text-shadow(darken($green, 20%));
+    background: $green;
+  }
+  
+  #flash_alert {
+    height: 40px;
+    width: 100%;
+    color: lighten($red, 20%); 
+    @include dark-on-light-text-shadow(darken($red, 20%));
+    background: $red;
+  }
+  
+  .close_me {
+    line-height: 19px;
+    font-size: 28px;
+    position: absolute;
+    //top: 7px; 
+    bottom: 7px;
+    right: 15px;
+    cursor: pointer;
+    background-color: #999;
+    width: 26px;
+    height: 26px;
+    @include border-radius(13px);
+  }
+}
+
+/* FIELDS WITH ERRORS */
+.field_with_errors {
+  background: $red;
+}
+
+/*-------------------
+  HEADER
+----------------------*/
+
+div#header {
+  $height: 60px;
+  height: $height;
+  line-height: $height;
+  margin: 0px 0px 40px;
+  @include background-image(linear-gradient(lighten($grey-blue, 8%), darken($grey-blue, 0%) 70%, darken($grey-blue, 0%)));
+        
+  div#logo {
+    h1 {
+      color: lighten($grey-blue, 30%);
+      @include light-on-dark-text-shadow(darken($grey-blue, 20%));
+      margin: 0px;
+      line-height: $height;
+      a { color: lighten($grey-blue, 30%); text-decoration: none; }
+    }
+  }
+  
+  div#nav {
+    text-align: right;
+    line-height: $height;
+  }
+}
