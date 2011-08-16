@@ -68,7 +68,7 @@ remove_file("config/compass.rb")
 compass_config_path = File.join(File.dirname(__FILE__), 'files','compass_config.rb')
 copy_file(compass_config_path, "config/compass.rb")
 remove_file("config/initializers/compass.rb")
-compass_initalizer_path = File.join(File.dirname(__FILE__), 'files','compass_initializer.rb')
+compass_initializer_path = File.join(File.dirname(__FILE__), 'files','compass_initializer.rb')
 copy_file(compass_initializer_path, "config/initializers/compass.rb")
 
 # HOME
@@ -331,7 +331,7 @@ copy_file(temp_application_html_path, "app/views/layouts/application.html.erb")
 # inject_into_file 'app/views/layouts/application.html.erb', "\n</div></div>", :after => "<%= yield %>"
 
 #FIX RAKE PROBLEM on HEROKU
-inject_into_file 'Rakefile', "require 'rake/dsl_definition'", :before => "require 'rake'"
+inject_into_file 'Rakefile', "require 'rake/dsl_definition'\n", :before => "require 'rake'"
 
 
 #INITIALIZERS
