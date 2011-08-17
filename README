@@ -1,5 +1,5 @@
 REQUIREMENTS
-RVM, Rails
+rvm with ruby 1.9.2, Rails 3.0.x
 
 USAGE
 
