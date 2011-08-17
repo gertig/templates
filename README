@@ -5,6 +5,7 @@ USAGE
 
 Clone the templates folder to the folder that all your rails apps are in or change the path in the command below:
 
+$ rvm use 1.9.2
 $ rails new appname -m templates/template.rb
 $ cd appname
 $ gem install bundler
