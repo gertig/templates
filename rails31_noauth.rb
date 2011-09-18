@@ -108,7 +108,7 @@ $(function(){
 end
 
 #Application.html.erb DOM stuff
-temp_application_html_path = File.join(File.dirname(__FILE__), 'files','rails31_application.html.erb')
+temp_application_html_path = File.join(File.dirname(__FILE__), 'files','noauth_application.html.erb')
 remove_file("app/views/layouts/application.html.erb")
 copy_file(temp_application_html_path, "app/views/layouts/application.html.erb")
 
