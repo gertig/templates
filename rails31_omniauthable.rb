@@ -4,7 +4,7 @@
 # USAGE
 # Place the templates folder in the same folder that all your rails apps are in or change the path in the command below
 
-# $ rails new appname -m templates/rails31.rb
+# $ rails new appname -m templates/rails31_omniauthable.rb
 # $ cd appname
 # $ gem install bundler
 # $ bundle install
@@ -13,13 +13,13 @@
 run "echo 'rvm use 1.9.2@#{app_name} --create' > .rvmrc"
 
 
-gem "pg" #, "~> 0.10.1"
-gem "thin"
-gem 'backbonejs-rails'
+#gem 'jquery-rails'
+#gem 'backbonejs-rails', "~> 0.0.3"
 gem 'inherited_resources', '1.2.1'
+#gem 'compass', "~> 0.11.5"
 gem 'devise'
 gem 'omniauth'
-gem "cancan" #, "1.6.5"
+gem "cancan", "1.6.5"
 
 inject_into_file 'Gemfile', :after => "gem 'uglifier'" do
   <<-eos
@@ -29,19 +29,21 @@ inject_into_file 'Gemfile', :after => "gem 'uglifier'" do
   eos
 end
 
-# inject_into_file 'Gemfile', :after => "gem 'sqlite3'" do
-#   <<-eos
-#   
-# group :development do
-#   gem "mongrel", "~> 1.2.0.pre2"
-# end
-#       
-#   eos
-# end
+inject_into_file 'Gemfile', :after => "gem 'sqlite3'" do
+  <<-eos
+  
+group :development do
+  gem "mongrel", "~> 1.2.0.pre2"
+end
+      
+  eos
+end
 
 inside app_name do
   run 'bundle install'
 end
+
+#generate 'backbonejs:install'
 
 
 #Compass
@@ -130,28 +132,26 @@ end
   eos
 end
 
-# create_file "app/controllers/omniauth_callbacks_controller.rb", "# Devise Omniauth Callbacks"
-# inject_into_file 'app/controllers/omniauth_callbacks_controller.rb', :after => "# Devise Omniauth Callbacks" do
-#   <<-eos
-# 
-# class OmniauthCallbacksController < Devise::OmniauthCallbacksController
-#   def facebook
-#     @user = User.find_for_facebook_oauth(env["omniauth.auth"], current_user)
-# 
-#     if @user.persisted?
-#       flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Facebook"
-#       sign_in_and_redirect @user, :event => :authentication
-#     else
-#       session["devise.facebook_data"] = env["omniauth.auth"]
-#       redirect_to new_user_registration_url
-#     end
-#   end
-# end
-# 
-#   eos
-# end
+create_file "app/controllers/omniauth_callbacks_controller.rb", "# Devise Omniauth Callbacks"
+inject_into_file 'app/controllers/omniauth_callbacks_controller.rb', :after => "# Devise Omniauth Callbacks" do
+  <<-eos
 
+class OmniauthCallbacksController < Devise::OmniauthCallbacksController
+  def facebook
+    @user = User.find_for_facebook_oauth(env["omniauth.auth"], current_user)
 
+    if @user.persisted?
+      flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Facebook"
+      sign_in_and_redirect @user, :event => :authentication
+    else
+      session["devise.facebook_data"] = env["omniauth.auth"]
+      redirect_to new_user_registration_url
+    end
+  end
+end
+
+  eos
+end
 
 # ADD custom UPDATE method to Users controller
 create_file "app/controllers/users_controller.rb", "# Devise Users Controller"
@@ -187,15 +187,11 @@ end
   eos
 end
 
-temp_authentications_controller_path = File.join(File.dirname(__FILE__), 'files','authentications_controller.rb')
-# remove_file("app/controllers/authentications_controller.rb")
-copy_file(temp_authentications_controller_path, "app/controllers/authentications_controller.rb")
+# Add :OMNIAUTHABLE to User Model
+inject_into_file "app/models/user.rb", " :omniauthable, :token_authenticatable,", :after => "devise :database_authenticatable, :registerable,"
+inject_into_file "app/models/user.rb", ", :first_name, :last_name, :uid, :access_token, :provider", :after => "attr_accessible :email, :password, :password_confirmation, :remember_me"
 
-# Add :token_authenticatable to User Model
-inject_into_file "app/models/user.rb", " :token_authenticatable,", :after => "devise :database_authenticatable, :registerable,"
-inject_into_file "app/models/user.rb", ", :first_name, :last_name", :after => "attr_accessible :email, :password, :password_confirmation, :remember_me"
-
-inject_into_file 'app/models/user.rb', :after => ":first_name, :last_name" do
+inject_into_file 'app/models/user.rb', :after => ":access_token, :provider" do
   <<-eos
     
     
@@ -219,9 +215,8 @@ inject_into_file 'app/models/user.rb', :after => ":first_name, :last_name" do
   eos
 end
 
-# Add profile fields to Users model with a migration
-generate("migration add_fields_to_users first_name:string last_name:string role:string")
-generate("model authentication user_id:integer uid:string provider:string")
+# Add Profile fields to Users model with a migration
+generate("migration add_fields_to_users first_name:string last_name:string role:string uid:string access_token:string provider:string")
 
 #Create Registration and User views
 registrations_edit_path = File.join(File.dirname(__FILE__), 'files','registrations_edit.html.erb')
@@ -290,26 +285,16 @@ initializer("app_keys.rb") do
 
     FACEBOOK_APP_ID = "PLEASEFIXME"
     FACEBOOK_APP_SECRET = "PLEASEFIXME"
-    TWITTER_KEY = "PLEASEFIXME"
-    TWITTER_SECRET = "PLEASEFIXME"
-  RUBY
-end
-
-initializer("omniauth.rb") do
-  <<-RUBY
-  
-    provider :twitter, TWITTER_KEY, TWITTER_SECRET
-    #use OmniAuth::Strategies::Twitter, TWITTER_KEY, TWITTER_SECRET # ENV['CONSUMER_KEY'], ENV['CONSUMER_SECRET']
-    provider :facebook, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, :iframe => true, :scope => 'email, user_about_me,
-                  user_activities,user_birthday,user_education_history,
-                  user_likes, user_location,
-                  publish_stream, friends_about_me' #, friends_birthday'
-  
   RUBY
 end
 
 inject_into_file 'config/initializers/devise.rb', :after => "# ==> OmniAuth" do
   <<-eos
+  
+  config.omniauth :facebook, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, :iframe => true, :scope => 'email, user_about_me,user_activities,user_birthday,user_education_history,
+                  user_events,user_groups,user_hometown,user_interests,user_likes, user_location,
+                  publish_stream, offline_access,
+                  friends_about_me, friends_interests, friends_likes'
                   
   #Token Authenitcation
   config.token_authentication_key = :auth_token
@@ -318,7 +303,7 @@ inject_into_file 'config/initializers/devise.rb', :after => "# ==> OmniAuth" do
 end
 
 # ROUTES.rb
-inject_into_file "config/routes.rb", ', :controllers => { :registrations => "registrations"}', :after => "devise_for :users"
+inject_into_file "config/routes.rb", ', :controllers => { :omniauth_callbacks => "omniauth_callbacks", :registrations => "registrations"}', :after => "devise_for :users"
 
 inject_into_file 'config/routes.rb', :before => 'get "home/index"' do
   <<-eos
