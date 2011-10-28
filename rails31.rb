@@ -9,6 +9,7 @@
 # $ gem install bundler
 # $ bundle install
 
+#This template allows multiple omniauth accounts for each user
 
 run "echo 'rvm use 1.9.2@#{app_name} --create' > .rvmrc"
 
@@ -130,28 +131,6 @@ end
   eos
 end
 
-# create_file "app/controllers/omniauth_callbacks_controller.rb", "# Devise Omniauth Callbacks"
-# inject_into_file 'app/controllers/omniauth_callbacks_controller.rb', :after => "# Devise Omniauth Callbacks" do
-#   <<-eos
-# 
-# class OmniauthCallbacksController < Devise::OmniauthCallbacksController
-#   def facebook
-#     @user = User.find_for_facebook_oauth(env["omniauth.auth"], current_user)
-# 
-#     if @user.persisted?
-#       flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Facebook"
-#       sign_in_and_redirect @user, :event => :authentication
-#     else
-#       session["devise.facebook_data"] = env["omniauth.auth"]
-#       redirect_to new_user_registration_url
-#     end
-#   end
-# end
-# 
-#   eos
-# end
-
-
 
 # ADD custom UPDATE method to Users controller
 create_file "app/controllers/users_controller.rb", "# Devise Users Controller"
@@ -196,27 +175,27 @@ inject_into_file "app/models/user.rb", " :token_authenticatable,", :after => "de
 inject_into_file "app/models/user.rb", ", :first_name, :last_name", :after => "attr_accessible :email, :password, :password_confirmation, :remember_me"
 
 inject_into_file 'app/models/user.rb', :after => ":first_name, :last_name" do
-  <<-eos
+  <<-RUBY
     
-    
-    def self.find_for_facebook_oauth(access_token, signed_in_resource=nil)
-      #raise access_token.to_yaml
-
-      data = access_token['extra']['user_hash']
-      if user = User.find_by_email(data["email"])
-        user
-      else # Create a user with a stub password. 
-        User.create!(:email => data["email"], 
-            :password => Devise.friendly_token[0,20],
-            :first_name => access_token["user_info"]["first_name"],
-            :last_name => access_token["user_info"]["last_name"],
-            :uid => access_token["uid"],
-            :access_token => access_token["credentials"]["token"],
-            :provider => access_token["provider"]) 
-      end
+  
+  #Checks to see if the email is blank in the API return
+  def self.apply_omniauth(omniauth)
+    if user = User.find_by_email(omniauth['user_info']['email'])
+      user
+    else
+      user = User.create!(
+        :email => omniauth['user_info']['email'],
+        :password => Devise.friendly_token[0,20],
+        :last_name => omniauth['user_info']['last_name'],
+        :first_name => omniauth['user_info']['first_name']
+        )
+        
+      user.authentications.build(:provider => omniauth['provider'], :uid => omniauth['uid'])
+      user
     end
+  end
     
-  eos
+  RUBY
 end
 
 # Add profile fields to Users model with a migration
