@@ -4,25 +4,29 @@
 # USAGE
 # Place the templates folder in the same folder that all your rails apps are in or change the path in the command below
 
+# $ rvm 1.9.2@rails31
 # $ rails new appname -m templates/rails31.rb
 # $ cd appname
 # $ gem install bundler
 # $ bundle install
+# $ createdb appname_development
 
 #This template allows multiple omniauth accounts for each user
 
 run "echo 'rvm use 1.9.2@#{app_name} --create' > .rvmrc"
 
 
-gem "pg" #, "~> 0.10.1"
+gem "pg"
 gem "thin"
 gem 'backbonejs-rails'
 gem 'inherited_resources', '1.2.1'
 gem 'devise'
 gem 'omniauth'
-gem "cancan" #, "1.6.5"
+gem 'omniauth-twitter'
+gem 'omniauth-facebook'
+gem "cancan"
 
-inject_into_file 'Gemfile', :after => "gem 'uglifier'" do
+inject_into_file 'Gemfile', :after => "gem 'uglifier', '>= 1.0.3'" do
   <<-eos
   
    gem "compass", "~> 0.12.alpha.0"
@@ -30,27 +34,71 @@ inject_into_file 'Gemfile', :after => "gem 'uglifier'" do
   eos
 end
 
-# inject_into_file 'Gemfile', :after => "gem 'sqlite3'" do
-#   <<-eos
-#   
-# group :development do
-#   gem "mongrel", "~> 1.2.0.pre2"
-# end
-#       
-#   eos
-# end
-
 inside app_name do
   run 'bundle install'
 end
 
 
+#CSS includes
+remove_file("app/assets/stylesheets/application.css")
+application_path = File.join(File.dirname(__FILE__), 'files','temp_application.css')
+copy_file(application_path, "app/assets/stylesheets/application.css")
+
+
 #Compass
 screen_path = File.join(File.dirname(__FILE__), 'files','temp_screen.scss')
 base_path = File.join(File.dirname(__FILE__), 'files','temp_base.scss')
+
+#Twitter Bootstrap
+bootstrap_path = File.join(File.dirname(__FILE__), 'files','bootstrap/bootstrap.scss')
+forms_path = File.join(File.dirname(__FILE__), 'files','bootstrap/forms.scss')
+mixins_path = File.join(File.dirname(__FILE__), 'files','bootstrap/mixins.scss')
+patterns_path = File.join(File.dirname(__FILE__), 'files','bootstrap/patterns.scss')
+reset_path = File.join(File.dirname(__FILE__), 'files','bootstrap/reset.scss')
+scaffolding_path = File.join(File.dirname(__FILE__), 'files','bootstrap/scaffolding.scss')
+tables_path = File.join(File.dirname(__FILE__), 'files','bootstrap/tables.scss')
+type_path = File.join(File.dirname(__FILE__), 'files','bootstrap/type.scss')
+variables_path = File.join(File.dirname(__FILE__), 'files','bootstrap/variables.scss')
 copy_file(screen_path, "app/assets/stylesheets/screen.css.scss")
 copy_file(base_path, "app/assets/stylesheets/partials/_base.css.scss")
+copy_file(bootstrap_path, "app/assets/stylesheets/bootstrap/bootstrap.scss")
+copy_file(forms_path, "app/assets/stylesheets/bootstrap/forms.scss")
+copy_file(mixins_path, "app/assets/stylesheets/bootstrap/mixins.scss")
+copy_file(patterns_path, "app/assets/stylesheets/bootstrap/patterns.scss")
+copy_file(reset_path, "app/assets/stylesheets/bootstrap/reset.scss")
+copy_file(scaffolding_path, "app/assets/stylesheets/bootstrap/scaffolding.scss")
+copy_file(tables_path, "app/assets/stylesheets/bootstrap/tables.scss")
+copy_file(type_path, "app/assets/stylesheets/bootstrap/type.scss")
+copy_file(variables_path, "app/assets/stylesheets/bootstrap/variables.scss")
 
+# [apg] TODO - figure out how to do this
+# Dir["config/examples/*"].each do |source|
+#    destination = "config/#{File.basename(source)}"
+#    if File.exist?(destination)
+#      puts "Skipping #{destination} because it already exists"
+#    else
+#      puts "Generating #{destination}"
+#      FileUtils.cp(source, destination)
+#    end
+# end
+
+#javascript
+js_path = File.join(File.dirname(__FILE__), 'files','bootstrap-dropdown.js')
+copy_file(js_path, "app/assets/javascripts/bootstrap-dropdown.js")
+js_path = File.join(File.dirname(__FILE__), 'files','spin.min.js')
+copy_file(js_path, "app/assets/javascripts/spin.min.js")
+
+remove_file("app/assets/stylesheets/application.js")
+js_path = File.join(File.dirname(__FILE__), 'files','application.js')
+copy_file(js_path, "app/assets/javascripts/application.js")
+
+#images
+image_path = File.join(File.dirname(__FILE__), 'files','images/298-circlex-white.png')
+copy_file(image_path, "app/assets/images/298-circlex-white.png")
+image_path = File.join(File.dirname(__FILE__), 'files','images/298-circlex.png')
+copy_file(image_path, "app/assets/images/298-circlex.png")
+image_path = File.join(File.dirname(__FILE__), 'files','images/circles.png')
+copy_file(image_path, "app/assets/images/circles.png")
 
 #FIX COMPASS on HEROKU
 # compass_config_path = File.join(File.dirname(__FILE__), 'files','compass_config.rb')
@@ -76,7 +124,7 @@ inject_into_file "app/controllers/dashboard_controller.rb", :after => "class Das
 end
 route('match "/dashboard", :to => "dashboard#show", :as => :dashboard')  #Inserted at the top of the routes.rb file
 create_file "app/views/dashboard/show.html.erb" do
-    "<p>Find me in app/views/dashboard/show.html.erb</p>"
+    '<%= title "App Name | Dashboard" %> <p>Find me in app/views/dashboard/show.html.erb</p>'
 end
 
 inject_into_file 'app/controllers/home_controller.rb', :after => "def index" do
@@ -100,6 +148,17 @@ rescue_from CanCan::AccessDenied do |exception|
 end
 
   eos
+end
+
+# title helper
+inject_into_file 'app/helpers/application_helper.rb', :after => "module ApplicationHelper" do
+  <<-RUBY
+  
+  def title(page_title)
+    content_for(:title) { page_title }
+  end
+
+  RUBY
 end
 
 # DEVISE setup
@@ -166,6 +225,7 @@ end
   eos
 end
 
+#create authentications controller
 temp_authentications_controller_path = File.join(File.dirname(__FILE__), 'files','authentications_controller.rb')
 # remove_file("app/controllers/authentications_controller.rb")
 copy_file(temp_authentications_controller_path, "app/controllers/authentications_controller.rb")
@@ -204,11 +264,14 @@ generate("model authentication user_id:integer uid:string provider:string")
 
 #Create Registration and User views
 registrations_edit_path = File.join(File.dirname(__FILE__), 'files','registrations_edit.html.erb')
-registrations_new_path = File.join(File.dirname(__FILE__), 'files','registrations_new.html.erb')
+registrations_new_path = File.join(File.dirname(__FILE__), 'files','devise_registrations_new.html.erb')
+sessions_new_path = File.join(File.dirname(__FILE__), 'files','devise_sessions_new.html.erb')
 users_edit_path = File.join(File.dirname(__FILE__), 'files','users_edit.html.erb')
 users_form_path = File.join(File.dirname(__FILE__), 'files','users_form.html.erb')
 copy_file(registrations_edit_path, "app/views/registrations/edit.html.erb")
 copy_file(registrations_new_path, "app/views/registrations/new.html.erb")
+remove_file("app/views/devise/sessions/new.html.erb")
+copy_file(sessions_new_path, "app/views/devise/sessions/new.html.erb")
 copy_file(users_edit_path, "app/views/users/edit.html.erb")
 copy_file(users_form_path, "app/views/users/_form.html.erb")
 
@@ -217,6 +280,14 @@ cancan_ability_path = File.join(File.dirname(__FILE__), 'files','cancan_ability.
 remove_file("app/models/ability.rb")
 copy_file(cancan_ability_path, "app/models/ability.rb")
 
+#Procfile
+procfile_path = File.join(File.dirname(__FILE__), 'files','Procfile')
+copy_file(procfile_path, "Procfile")
+
+# Create Postgres database.yml file
+temp_database_path = File.join(File.dirname(__FILE__), 'files','database.yml')
+remove_file("config/database.yml")
+copy_file(temp_database_path, "config/database.yml")
 
 
 # clean up rails defaults
@@ -224,6 +295,8 @@ remove_file 'public/index.html'
 remove_file 'public/images/rails.png'
 run 'cp config/database.yml config/database.example'
 run "echo 'config/database.yml' >> .gitignore"
+
+
 
 #JAVASCRIPT FLASH NOTICES
 inject_into_file 'app/assets/javascripts/application.js', :after => "//= require_tree ." do
@@ -234,7 +307,7 @@ $(function(){
   
   //PUSHDOWN MESSAGES
   if ($(".flashy").length) {
-     $("div.close_me").live("click", function(){
+     $(".close_me").live("click", function(){
        $(this).hide();
        $("div#messages").hide();
      });
@@ -277,12 +350,16 @@ end
 initializer("omniauth.rb") do
   <<-RUBY
   
-    provider :twitter, TWITTER_KEY, TWITTER_SECRET
-    #use OmniAuth::Strategies::Twitter, TWITTER_KEY, TWITTER_SECRET # ENV['CONSUMER_KEY'], ENV['CONSUMER_SECRET']
-    provider :facebook, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, :iframe => true, :scope => 'email, user_about_me,
-                  user_activities,user_birthday,user_education_history,
-                  user_likes, user_location,
-                  publish_stream, friends_about_me' #, friends_birthday'
+  Rails.application.config.middleware.use OmniAuth::Builder do
+   # provider :facebook, 'APP_ID', 'APP_SECRET'
+   provider :twitter, TWITTER_KEY, TWITTER_SECRET
+   #use OmniAuth::Strategies::Twitter, TWITTER_KEY, TWITTER_SECRET # ENV['CONSUMER_KEY'], ENV['CONSUMER_SECRET']
+   provider :facebook, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, :iframe => true, :scope => 'email, user_about_me,
+                   user_activities,user_birthday,user_education_history,
+                   user_likes, user_location,
+                   publish_stream, friends_about_me' #, friends_birthday'
+  end
+
   
   RUBY
 end
@@ -329,5 +406,7 @@ say <<-eos
   2. Accept the .rvmrc file
   3. run $ gem install bundler
   4. run $ bundle install
+  5. run $ createdb appname_development
+  5. update database.yml
   
 eos

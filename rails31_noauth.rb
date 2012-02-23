@@ -4,7 +4,7 @@
 # USAGE
 # Place the templates folder in the same folder that all your rails apps are in or change the path in the command below
 
-# $ rails new appname -m templates/rails31.rb
+# $ rails new appname -m templates/rails31_noauth.rb
 # $ cd appname
 # $ gem install bundler
 # $ bundle install
@@ -19,7 +19,7 @@ run "echo 'rvm use 1.9.2@#{app_name} --create' > .rvmrc"
 #gem 'omniauth'
 #gem "cancan", "1.6.5"
 
-inject_into_file 'Gemfile', :after => "gem 'uglifier'" do
+inject_into_file 'Gemfile', :after => "gem 'uglifier', '>= 1.0.3'" do
   <<-eos
   
    gem "compass", "~> 0.12.alpha.0"

@@ -21,7 +21,7 @@ gem 'devise'
 gem 'omniauth'
 gem "cancan", "1.6.5"
 
-inject_into_file 'Gemfile', :after => "gem 'uglifier'" do
+inject_into_file 'Gemfile', :after => "gem 'uglifier', '>= 1.0.3'" do
   <<-eos
   
    gem "compass", "~> 0.12.alpha.0"

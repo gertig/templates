@@ -1,23 +1,25 @@
 // This import applies a global reset to any page that imports this stylesheet.
-@import "blueprint/reset";
-@import "compass/css3/border-radius";
+//@import "blueprint/reset";
 // To configure blueprint, edit the partials/base.sass file.
 @import "partials/base";
 // Import all the default blueprint modules so that we can access their mixins.
-@import "blueprint";
+//@import "blueprint";
 // Import the non-default scaffolding module.
-@import "blueprint/scaffolding";
+//@import "blueprint/scaffolding";
 
+//@import "bootstrap/bootstrap";
+
+@import "compass/css3/border-radius";
 @import "compass/css3/images";
 @import "compass/css3/font-face";
 @import "compass/utilities";
 
-@include font-face("AllerBold", font-files("/fonts/AllerBold.ttf", font/truetype));
-@include font-face("SocialIcons", font-files("/fonts/SocialIcons.otf", font/opentype));
+//@include font-face("AllerBold", font-files("/fonts/AllerBold.ttf", font/truetype));
+//@include font-face("SocialIcons", font-files("/fonts/SocialIcons.otf", font/opentype));
 
 // To generate css equivalent to the blueprint css but with your
 // configuration applied, uncomment:
-@include blueprint;
+//@include blueprint;
 
 //Color Palette
 //http://www.colourlovers.com/palette/1620509/Ocean_Breeze
@@ -31,8 +33,19 @@ $green: #008c44;
 .hidden_item { display: none; }
 a:hover { background: transparent; }
 
+html {
+  height: 100%;
+  background-image: url(/assets/circles.png); 
+}
+
+body { 
+  padding-top: 40px; 
+  background-image: url(/assets/circles.png); 
+  height: 100%;
+}
+
 div#content {
-  margin: 0px;
+  margin-top: 0px;
 }
 
 /*-------------------------
@@ -63,17 +76,17 @@ div#messages {
   
   .close_me {
     line-height: 19px;
-    font-size: 28px;
+    //font-size: 28px;
     position: absolute;
-    //top: 7px; 
     bottom: 7px;
     right: 15px;
-    cursor: pointer;
-    background-color: #999;
+    //cursor: pointer;
+    //background-color: #999;
     width: 26px;
     height: 26px;
-    @include border-radius(13px);
+    //@include border-radius(13px);
   }
+  
 }
 
 /* FIELDS WITH ERRORS */
@@ -85,25 +98,3 @@ div#messages {
   HEADER
 ----------------------*/
 
-div#header {
-  $height: 60px;
-  height: $height;
-  line-height: $height;
-  margin: 0px 0px 40px;
-  @include background-image(linear-gradient(lighten($grey-blue, 8%), darken($grey-blue, 0%) 70%, darken($grey-blue, 0%)));
-        
-  div#logo {
-    h1 {
-      color: lighten($grey-blue, 30%);
-      @include light-on-dark-text-shadow(darken($grey-blue, 20%));
-      margin: 0px;
-      line-height: $height;
-      a { color: lighten($grey-blue, 30%); text-decoration: none; }
-    }
-  }
-  
-  div#nav {
-    text-align: right;
-    line-height: $height;
-  }
-}
